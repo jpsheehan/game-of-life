@@ -1,6 +1,6 @@
-var Life = function () {
-  this.width = 32
-  this.height = 32
+var Life = function (width=32, height=32) {
+  this.width = width
+  this.height = height
 
   this.createGrid = function (width, height, value) {
     var grid = []

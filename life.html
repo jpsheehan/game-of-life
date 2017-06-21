@@ -2,25 +2,56 @@
 <html>
   <head>
     <title>Life</title>
+    <style type='text/css'>
+      html, body {
+        margin: 0px;
+        padding: 0px;
+        background-color: #000;
+        font-family: 'Trebuchet MS', Arial, sans-serif;
+      }
+
+      #controls {
+        position: fixed;
+        top: 10px !important;
+        left: 10px !important;
+        background-color: #000;
+        color: #FFF;
+        margin: 0px;
+        opacity: 0.2;
+      }
+
+      #controls:hover {
+        opacity: 1.0;
+      }
+    </style>
   </head>
   <body>
     <canvas id='life'></canvas>
-    <br />
-    FPS: <input type='number' id='speed' value='30' />
-    <input type='button' id='startstop' value='Start' />
-
+    <div id='controls'>
+      FPS: <input type='number' id='speed' value='30' />
+      <input type='button' id='startstop' value='Start' />
+      <br />
+      Generation: <span id='generation'>0</span>
+    </div>
     <script type='text/javascript' src='life.js'></script>
     <script type='text/javascript'>
       var running = false
       var _int = null
+      var generation = 0
+      var CELL_SIZE = 5
 
-      var life = new Life()
+      var shape = 'rectangle'
+
+      var life = new Life(parseInt(window.innerWidth / CELL_SIZE) - 1, parseInt(window.innerHeight / CELL_SIZE) - 1)
 
       var canvas = document.getElementById('life')
-      canvas.style.border = 'solid 1px black'
-      canvas.width = life.width * 10
-      canvas.height = life.height * 10
+      canvas.width = life.width * CELL_SIZE
+      canvas.height = life.height * CELL_SIZE
       canvas.style.backgroundColor = 'black'
+
+      document.body.style.marginLeft = parseInt((window.innerWidth - life.width * CELL_SIZE) / 2).toString() + 'px'
+
+      document.body.style.marginTop = parseInt((window.innerHeight - life.height * CELL_SIZE) / 2 - 1).toString() + 'px'
 
       var ctx = canvas.getContext('2d')
 
@@ -28,13 +59,23 @@
         var state = life.grid[y][x]
 
         if (state) {
-          ctx.fillStyle = 'rgb(200, 0, 0)'
+          ctx.fillStyle = 'rgb(238, 238, 238)'
         }
         else {
-          ctx.fillStyle = 'rgb(0, 0, 0)'
+          ctx.fillStyle = 'rgb(17, 17, 17)'
         }
 
-        ctx.fillRect(x * 10, y * 10, 10, 10)
+        if (shape == 'rectangle') {
+          ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+        }
+        else if (shape == 'circle') {
+          var cx = x * CELL_SIZE + CELL_SIZE / 2,
+              cy = y * CELL_SIZE + CELL_SIZE / 2
+          
+          ctx.beginPath()
+          ctx.arc(cx, cy, CELL_SIZE / 2, 0, 2 * Math.PI, false)
+          ctx.fill()
+        }
       }
 
       document.getElementById('startstop').onclick = function () {
@@ -46,7 +87,11 @@
         else {
           document.getElementById('startstop').value = 'Stop'
           running = true
-          _val = setInterval(function(){life.step()}, 1000 / parseInt(document.getElementById('speed').value))
+          _val = setInterval(function(){
+            generation++
+            life.step()
+            document.getElementById('generation').innerText = generation
+          }, 1000 / parseInt(document.getElementById('speed').value))
         }
       }
 
@@ -54,18 +99,23 @@
         var x = event.pageX - canvas.offsetLeft,
             y = event.pageY - canvas.offsetTop
         
-        life.setCell(parseInt(x / 10), parseInt(y / 10))
+        life.setCell(parseInt(x / CELL_SIZE), parseInt(y / CELL_SIZE))
         life.flush()
       })
 
       function reset() {
+        generation = 0
+
         life.reset()
 
-        life.setCell(8, 8, true)
-        life.setCell(9, 9, true)
-        life.setCell(9, 10, true)
-        life.setCell(8, 10, true)
-        life.setCell(7, 10, true)
+        var mx = parseInt(life.width / 2),
+            my = parseInt(life.height / 2)
+
+        life.setCell(mx, my-1, true)
+        life.setCell(mx+1, my, true)
+        life.setCell(mx+1, my+1, true)
+        life.setCell(mx, my+1, true)
+        life.setCell(mx-1, my+1, true)
 
         life.flush()
       }
