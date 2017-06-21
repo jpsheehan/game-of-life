@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Life</title>
+  </head>
+  <body>
+    <canvas id='life'></canvas>
+    <br />
+    FPS: <input type='number' id='speed' value='30' />
+    <input type='button' id='startstop' value='Start' />
+
+    <script type='text/javascript' src='life.js'></script>
+    <script type='text/javascript'>
+      var running = false
+      var _int = null
+
+      var life = new Life()
+
+      var canvas = document.getElementById('life')
+      canvas.style.border = 'solid 1px black'
+      canvas.width = life.width * 10
+      canvas.height = life.height * 10
+      canvas.style.backgroundColor = 'black'
+
+      var ctx = canvas.getContext('2d')
+
+      life.onUpdate = function (x, y) {
+        var state = life.grid[y][x]
+
+        if (state) {
+          ctx.fillStyle = 'rgb(200, 0, 0)'
+        }
+        else {
+          ctx.fillStyle = 'rgb(0, 0, 0)'
+        }
+
+        ctx.fillRect(x * 10, y * 10, 10, 10)
+      }
+
+      document.getElementById('startstop').onclick = function () {
+        if (running) {
+          document.getElementById('startstop').value = 'Start'
+          running = false
+          clearInterval(_val)
+        }
+        else {
+          document.getElementById('startstop').value = 'Stop'
+          running = true
+          _val = setInterval(function(){life.step()}, 1000 / parseInt(document.getElementById('speed').value))
+        }
+      }
+
+      canvas.addEventListener('click', function (event) {
+        var x = event.pageX - canvas.offsetLeft,
+            y = event.pageY - canvas.offsetTop
+        
+        life.setCell(parseInt(x / 10), parseInt(y / 10))
+        life.flush()
+      })
+
+      function reset() {
+        life.reset()
+
+        life.setCell(8, 8, true)
+        life.setCell(9, 9, true)
+        life.setCell(9, 10, true)
+        life.setCell(8, 10, true)
+        life.setCell(7, 10, true)
+
+        life.flush()
+      }
+
+      reset()
+    </script>
+  </body>
+</html>
