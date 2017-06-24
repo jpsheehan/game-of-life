@@ -1,4 +1,3 @@
-
 var running = false
 var helping = false
 var interval = null
@@ -10,7 +9,28 @@ var shape = 'rectangle'
 var life = null
 var canvas = document.getElementById('life')
 var ctx = canvas.getContext('2d')
-var messageFadeInterval = null
+var messageFadeInterval = null;
+
+var rtime;
+var timeout = false;
+var delta = 200;
+
+window.addEventListener('resize', function() {
+    rtime = new Date();
+    if (timeout === false) {
+        timeout = true;
+        setTimeout(resizeend, delta);
+    }
+});
+
+function resizeend() {
+    if (new Date() - rtime < delta) {
+        setTimeout(resizeend, delta);
+    } else {
+        timeout = false;
+        resizeGrid()
+    }               
+}
 
 canvas.addEventListener('click', function (event) {
   var x = event.pageX - canvas.offsetLeft,
@@ -102,6 +122,18 @@ document.addEventListener('keydown', function (event) {
       break
   }
 })
+
+function resizeGrid() {
+
+  life.resize(parseInt(window.innerWidth / CELL_SIZE) - 1, parseInt(window.innerHeight / CELL_SIZE) - 1)
+
+  ctx.canvas.width = life.width * CELL_SIZE
+  ctx.canvas.height = life.height * CELL_SIZE
+
+  document.body.style.marginLeft = parseInt((window.innerWidth - life.width * CELL_SIZE) / 2 - 1).toString() + 'px'
+
+  document.body.style.marginTop = parseInt((window.innerHeight - life.height * CELL_SIZE) / 2 - 1).toString() + 'px'
+}
 
 function clearGrid(){
   life.reset()
@@ -240,9 +272,8 @@ function init() {
 
   canvas.width = life.width * CELL_SIZE
   canvas.height = life.height * CELL_SIZE
-  canvas.style.backgroundColor = 'black'
 
-  document.body.style.marginLeft = parseInt((window.innerWidth - life.width * CELL_SIZE) / 2).toString() + 'px'
+  document.body.style.marginLeft = parseInt((window.innerWidth - life.width * CELL_SIZE) / 2 - 1).toString() + 'px'
 
   document.body.style.marginTop = parseInt((window.innerHeight - life.height * CELL_SIZE) / 2 - 1).toString() + 'px'
 
